@@ -27,9 +27,14 @@ function useShouldSkipComposerAutoFocus(report: OnyxEntry<Report>): boolean {
     // Read off the context because `useRoute` throws outside a screen.
     const routeName = useContext(NavigationRouteContext)?.name;
     const [hasExpenseCarousel = false] = useOnyx(ONYXKEYS.TRANSACTION_THREAD_NAVIGATION_TRANSACTION_IDS, {selector: hasExpenseCarouselSelector});
+    const [lastSearchQuery] = useOnyx(ONYXKEYS.REPORT_NAVIGATION_LAST_SEARCH_QUERY);
+    const hasReportCarousel = !!lastSearchQuery?.queryJSON;
 
     const isExpenseView = isReportTransactionThread(report) || isOneTransactionReport(report);
-    return isWeb && routeName !== SCREENS.REPORT && hasExpenseCarousel && isExpenseView;
+    const isSearchReportRHP = routeName === SCREENS.RIGHT_MODAL.SEARCH_REPORT;
+    const isSearchMoneyRequestReportRHP = routeName === SCREENS.RIGHT_MODAL.SEARCH_MONEY_REQUEST_REPORT;
+
+    return isWeb && ((isSearchReportRHP && hasExpenseCarousel && isExpenseView) || (isSearchMoneyRequestReportRHP && hasReportCarousel) || (routeName !== SCREENS.REPORT && hasExpenseCarousel && isExpenseView));
 }
 
 export default useShouldSkipComposerAutoFocus;

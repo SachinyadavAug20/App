@@ -3,12 +3,14 @@ import {useSearchResultsContext} from '@components/Search/SearchContext';
 import Text from '@components/Text';
 
 import useFilterPendingDeleteReports from '@hooks/useFilterPendingDeleteReports';
+import useKeyboardShortcut from '@hooks/useKeyboardShortcut';
 import useLocalize from '@hooks/useLocalize';
 import useOnyx from '@hooks/useOnyx';
 import useSearchSections from '@hooks/useSearchSections';
 import useShouldReturnTripRooms from '@hooks/useShouldReturnTripRooms';
 import useThemeStyles from '@hooks/useThemeStyles';
 
+import getPlatform from '@libs/getPlatform';
 import {startSpan} from '@libs/telemetry/activeSpans';
 
 import Navigation from '@navigation/Navigation';
@@ -26,6 +28,8 @@ import type {OnyxEntry} from 'react-native-onyx';
 import {useIsFocused} from '@react-navigation/native';
 import React, {startTransition, useEffect, useState} from 'react';
 import {View} from 'react-native';
+
+const isWeb = getPlatform() === CONST.PLATFORM.WEB;
 
 type MoneyRequestReportNavigationProps = {
     reportID?: string;
@@ -249,6 +253,30 @@ function MoneyRequestReportNavigationContent({reportID, shouldDisplayNarrowVersi
         const prevIndex = (currentIndex - 1) % effectiveAllReports.length;
         goToReportId(effectiveAllReports.at(prevIndex));
     };
+
+    const isArrowKeyNavigationActive = isWeb && isFocused && shouldDisplayNavigationArrows;
+
+    useKeyboardShortcut(
+        CONST.KEYBOARD_SHORTCUTS.ARROW_LEFT,
+        (event) => {
+            if (event?.defaultPrevented || hidePrevButton) {
+                return;
+            }
+            goToPrevReport();
+        },
+        {captureOnInputs: false, isActive: isArrowKeyNavigationActive && !hidePrevButton},
+    );
+
+    useKeyboardShortcut(
+        CONST.KEYBOARD_SHORTCUTS.ARROW_RIGHT,
+        (event) => {
+            if (event?.defaultPrevented || hideNextButton) {
+                return;
+            }
+            goToNextReport();
+        },
+        {captureOnInputs: false, isActive: isArrowKeyNavigationActive && !hideNextButton},
+    );
 
     return (
         <>

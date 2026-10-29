@@ -37,6 +37,8 @@ import {isValidReportIDFromPath, shouldAutoFocusOnKeyPress} from '@libs/ReportUt
 import updateMultilineInputRange from '@libs/updateMultilineInputRange';
 import willBlurTextInputOnTapOutsideFunc from '@libs/willBlurTextInputOnTapOutside';
 
+import Navigation from '@navigation/Navigation';
+
 import {useReportActionActiveEditActions} from '@pages/inbox/report/ReportActionEditMessageContext';
 import useDebouncedSaveDraft from '@pages/inbox/report/useDebouncedSaveDraft';
 import useDebouncedSaveReportActionDraft from '@pages/inbox/report/useDebouncedSaveReportActionDraft';
@@ -821,7 +823,8 @@ function ComposerWithSuggestions({
      */
     const checkComposerVisibility = useCallback(() => {
         // Checking whether the screen is focused or not, helps avoid `modal.isVisible` false when popups are closed, even if the modal is opened.
-        const isComposerCoveredUp = !isFocused || isEmojiPickerVisible() || isMenuVisible || !!modal?.isVisible || modal?.willAlertModalBecomeVisible;
+        const isModalVisible = Navigation.isTopmostRouteModalScreen() ? !areAllModalsHidden() : !!modal?.isVisible;
+        const isComposerCoveredUp = !isFocused || isEmojiPickerVisible() || isMenuVisible || isModalVisible || modal?.willAlertModalBecomeVisible;
         return !isComposerCoveredUp;
     }, [isMenuVisible, modal?.isVisible, modal?.willAlertModalBecomeVisible, isFocused]);
 
