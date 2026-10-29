@@ -15,7 +15,7 @@ import getCurrencyForNonUSDBankAccount from '@pages/ReimbursementAccount/NonUSD/
 import getInitialSubStepForBankInfoStep from '@pages/ReimbursementAccount/NonUSD/utils/getInitialSubStepForBankInfoStep';
 import getInputKeysForBankInfoStep from '@pages/ReimbursementAccount/NonUSD/utils/getInputKeysForBankInfoStep';
 
-import {clearReimbursementAccountBankCreation, createCorpayBankAccount, getCorpayBankAccountFields} from '@userActions/BankAccounts';
+import {clearReimbursementAccountBankCreation, createCorpayBankAccount, getCorpayBankAccountFields, hideBankAccountErrors} from '@userActions/BankAccounts';
 import {clearErrors} from '@userActions/FormActions';
 
 import CONST from '@src/CONST';
@@ -54,6 +54,11 @@ function BankInfo({onBackButtonPress, onSubmit, policyID, stepNames, backTo}: No
     const isSubmittingRef = useRef(false);
 
     const submit = () => {
+        if (reimbursementAccount?.achData?.bankAccountID) {
+            onSubmit();
+            return;
+        }
+
         const {formFields, isLoading, isSuccess, ...corpayData} = corpayFields ?? {};
 
         isSubmittingRef.current = true;
@@ -62,7 +67,9 @@ function BankInfo({onBackButtonPress, onSubmit, policyID, stepNames, backTo}: No
 
     useNetwork({
         onReconnect: () => {
-            getCorpayBankAccountFields(country, currency);
+            if (corpayFields?.isSuccess !== true) {
+                getCorpayBankAccountFields(country, currency);
+            }
         },
     });
 
@@ -110,6 +117,7 @@ function BankInfo({onBackButtonPress, onSubmit, policyID, stepNames, backTo}: No
 
     const handleBackButtonPress = () => {
         clearErrors(ONYXKEYS.FORMS.REIMBURSEMENT_ACCOUNT_FORM);
+        hideBankAccountErrors();
         if (isEditing) {
             Navigation.goBack(buildRoute(SUB_PAGE_NAMES.CONFIRMATION));
             return;
