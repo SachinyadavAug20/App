@@ -136,15 +136,29 @@ function ThreeDotsMenu({
         hidePopoverMenu();
     }, [hidePopoverMenu, isBehindModal, isPopupMenuVisible, isContainerFocused]);
 
+    const getMenuPositionRef = useRef(getMenuPosition);
+    getMenuPositionRef.current = getMenuPosition;
+
     useLayoutEffect(() => {
-        if (!getMenuPosition || !isPopupMenuVisible) {
+        if (!getMenuPositionRef.current || !isPopupMenuVisible) {
             return;
         }
 
-        getMenuPosition?.().then((value) => {
-            setPosition(value);
+        const animationFrameId = requestAnimationFrame(() => {
+            getMenuPositionRef.current?.().then((value) => {
+                setPosition((prevPosition) => {
+                    if (prevPosition?.horizontal === value.horizontal && prevPosition?.vertical === value.vertical) {
+                        return prevPosition;
+                    }
+                    return value;
+                });
+            });
         });
-    }, [windowWidth, windowHeight, shouldSelfPosition, getMenuPosition, isPopupMenuVisible]);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, [windowWidth, windowHeight, shouldSelfPosition, isPopupMenuVisible]);
 
     const getIconFill = () => {
         if (!shouldChangeFillOnOpen) {
