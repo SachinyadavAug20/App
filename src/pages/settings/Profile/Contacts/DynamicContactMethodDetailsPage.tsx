@@ -147,8 +147,7 @@ function DynamicContactMethodDetailsPage({route}: DynamicContactMethodDetailsPag
             // Set flag to navigate when screen regains focus
             setShouldNavigateOnFocus(true);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- Omitting `isFocused` since we don't want this effect to on focus transitions
-    }, [prevValidatedDate, loginData?.validatedDate, isDefaultContactMethod, listPath]);
+    }, [prevValidatedDate, loginData?.validatedDate, isFocused, isDefaultContactMethod, listPath]);
 
     // Handle navigation when screen regains focus and flag is set
     useEffect(() => {
@@ -157,8 +156,7 @@ function DynamicContactMethodDetailsPage({route}: DynamicContactMethodDetailsPag
         }
         setShouldNavigateOnFocus(false);
         Navigation.goBack(listPath);
-        // eslint-disable-next-line react-hooks/exhaustive-deps -- Only fire on focus transitions
-    }, [isFocused]);
+    }, [isFocused, shouldNavigateOnFocus, listPath]);
 
     useEffect(() => {
         setIsValidateCodeFormVisible(!loginData?.validatedDate);
