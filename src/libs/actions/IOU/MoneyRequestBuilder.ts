@@ -1523,12 +1523,13 @@ function getMoneyRequestInformation(moneyRequestInformation: MoneyRequestInforma
             if (typeof iouReport.unheldTotal === 'number') {
                 // Use newReportTotal in scenarios where the total is based on more than just the current transaction amount, and we need to override it manually
                 if (hasReportTotalOverride) {
-                    iouReport.unheldTotal = newReportTotal;
+                    const heldDelta = (previousReportTotal ?? iouReport.total ?? 0) - (previousUnheldTotal ?? iouReport.unheldTotal ?? 0);
+                    iouReport.unheldTotal = newReportTotal !== undefined && heldDelta > 0 ? newReportTotal - heldDelta : newReportTotal;
                 } else {
                     iouReport.unheldTotal -= reportAmount;
                 }
                 if (reimbursable && newUnheldReimbursableTotal === undefined && isCurrencyMatching) {
-                    iouReport.unheldReimbursableTotal = newReportTotal ? newReportTotal - (iouReport.unheldNonReimbursableTotal ?? 0) : previousUnheldReimbursableTotal - reportAmount;
+                    iouReport.unheldReimbursableTotal = newReportTotal ? (iouReport.unheldTotal ?? newReportTotal) - (iouReport.unheldNonReimbursableTotal ?? 0) : previousUnheldReimbursableTotal - reportAmount;
                 }
             }
         }

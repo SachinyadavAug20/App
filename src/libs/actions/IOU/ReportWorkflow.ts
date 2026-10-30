@@ -241,6 +241,11 @@ function approveMoneyRequest(params: ApproveMoneyRequestFunctionParams) {
 
     const updatedExpenseReport = {
         ...expenseReport,
+        ...(!full && {
+            total: expenseReport.unheldTotal ?? expenseReport.total,
+            reimbursableTotal: expenseReport.unheldReimbursableTotal ?? expenseReport.reimbursableTotal,
+            nonReimbursableTotal: expenseReport.unheldNonReimbursableTotal ?? expenseReport.nonReimbursableTotal,
+        }),
         ...(shouldAddOptimisticApproveAction
             ? {
                   lastMessageText: getReportActionText(optimisticApprovedReportAction),
