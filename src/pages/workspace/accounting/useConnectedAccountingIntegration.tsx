@@ -478,7 +478,7 @@ function useConnectedAccountingIntegration(policy: OnyxEntry<Policy>, {menuItemW
         }
     };
     const integrationSpecificMenuItems = getIntegrationSpecificMenuItems();
-    const shouldKeepIntegrationSpecificMenuItemOnSyncError = connectedIntegration === CONST.POLICY.CONNECTIONS.NAME.ZOHO_BOOKS;
+    const shouldKeepIntegrationSpecificMenuItemOnAuthError = connectedIntegration === CONST.POLICY.CONNECTIONS.NAME.ZOHO_BOOKS;
 
     const getConnectionDetails = () => {
         if (!connectedIntegration || !policyID) {
@@ -572,7 +572,7 @@ function useConnectedAccountingIntegration(policy: OnyxEntry<Policy>, {menuItemW
             : [];
 
         const settingsMenuItems: MenuItemData[] = [
-            ...(isEmptyObject(integrationSpecificMenuItems) || (shouldShowSynchronizationError && !shouldKeepIntegrationSpecificMenuItemOnSyncError) || !hasAccountingConnection
+            ...(isEmptyObject(integrationSpecificMenuItems) || (hasAuthError && !shouldKeepIntegrationSpecificMenuItemOnAuthError) || !hasAccountingConnection
                 ? []
                 : [integrationSpecificMenuItems]),
             ...(!hasAccountingConnection || !isConnectionVerified ? [] : configurationOptions),
