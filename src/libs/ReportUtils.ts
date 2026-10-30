@@ -12852,20 +12852,31 @@ function getNonHeldAndFullAmount(
         unheldTotal = iouReport?.unheldTotal ?? unheldReimbursableTotal + (iouReport?.unheldNonReimbursableTotal ?? 0);
     }
 
+    const hasHeldExpensesLocal = hasHeldExpenses(allReportTransactions);
+    if (hasHeldExpensesLocal && unheldTotal === total) {
+        const heldAmount = allReportTransactions
+            .filter((transaction) => isOnHoldTransactionUtils(transaction) && (!shouldExcludeNonReimbursables || transaction.reimbursable) && transaction.currency === iouReport?.currency)
+            .reduce((sum, transaction) => sum + Math.abs(getTransactionAmount(transaction, isExpenseReport(iouReport))), 0);
+        if (heldAmount > 0) {
+            unheldTotal = total - heldAmount * coefficient;
+        }
+    }
+
     const adjustedUnheldTotal = unheldTotal * coefficient;
     const adjustedTotal = total * coefficient;
 
     // For the "approve unheld" option to be valid, we need:
     // 1. There should be held expenses
-    // 2. For expense reports with negative totals, we need to ensure the unheld amount is valid
-    //    by checking that the absolute values are meaningful and different
-    const hasHeldExpensesLocal = hasHeldExpenses(allReportTransactions);
+    // 2. The unheld amount must be different from the full amount
+    // 3. For expense reports with negative totals, we need to ensure the unheld amount is valid
+    //    by checking that the absolute values are meaningful
     const hasValidNonHeldAmount =
         hasHeldExpensesLocal &&
+        adjustedUnheldTotal !== adjustedTotal &&
         // For normal cases (positive amounts or IOU reports)
         (adjustedUnheldTotal >= 0 ||
             // For expense reports with negative amounts, check if amounts are meaningful
-            (isExpenseReport(iouReport) && Math.abs(adjustedUnheldTotal) > 0 && Math.abs(adjustedUnheldTotal) !== Math.abs(adjustedTotal)));
+            (isExpenseReport(iouReport) && Math.abs(adjustedUnheldTotal) > 0));
 
     return {
         nonHeldAmount: convertToDisplayString(adjustedUnheldTotal, iouReport?.currency),
